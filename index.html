@@ -18,7 +18,36 @@
 
 <body>
   <div id="app">
-    <!-- <p>{{ message }}</p> -->
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary mb-3 mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      Pay Me
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Pay Me</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="submitForm">
+              <div class="mb-3">
+                <label for="phone_number" class="form-label">Phone Number</label>
+                <input class="form-control" v-model="phoneNumber">
+              </div>
+              <div class="mb-3">
+                <label for="amount" class="form-label">Amount</label>
+                <input type="text" class="form-control" v-model="amount" aria-describedby="">
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-if="loading">
       <p>Loading...</p>
     </div>
@@ -42,31 +71,46 @@
           <td class="table-success">{{ a["2. high"] }}</td>
           <td class="table-danger">{{ a["3. low"] }}</td>
           <td class="table-warning">{{ a["4. close"] }}</td>
-          <td class="table-info">{{ a["5. volume"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+          <td class="table-info">{{ a["5. volume"] }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.js"></script>
+
   <script type="text/javascript">
     var app = new Vue({
       el: "#app",
+
       data: {
         message: "Hello Vue!",
         loading: true,
         errored: "",
+        amount: "",
+        phoneNumber: "",
       },
+
+      methods: {
+        submitForm() {
+          axios.post('http://127.0.0.1:5001/stkpush', {
+            phoneNumber: this.phoneNumber,
+            amount: this.amount
+          }).then(response => {
+            console.log('The response is ', response)
+          }).catch(error => {
+            console.log('The error is ', error)
+          })
+          // this.number = '';
+        }
+      },
+
       mounted() {
         axios
-          .get('http://127.0.0.1:5000/json/forex')
+          .get('http://127.0.0.1:5001/json/forex')
           .then((response) => {
-            // console.log(response);
-            // console.log(typeof response);
-            // console.log(typeof response.data);
-            // console.log(typeof response.data[0]);
-            // console.log(typeof response.data[0]['Weekly Time Series']);
             this.message = response.data[0]['Weekly Time Series']
           })
           .catch((error) => {
@@ -75,12 +119,15 @@
           })
           .finally(() => (this.loading = false));
       },
-    });
+    }
+    );
   </script>
 
   <!-- datatables -->
-  <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+    crossorigin="anonymous"></script>
   <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
   <script>
     $(document).ready(function () {
       $("#alphavantage").DataTable(
